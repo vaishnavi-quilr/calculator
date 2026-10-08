@@ -37,16 +37,6 @@ jobs:
         with:
           sarif_file: quilr.sarif
           category: quilr
-      # After your build step, before the image is pushed:
-      - name: Quilr image scan
-        env:
-          QUILR_URL: https://threatlabs.quilrai.dev/api
-          QUILR_SECURITY_URL: https://threatlabs.quilrai.dev/api
-          QUILR_TOKEN: ${{ secrets.QUILR_TOKEN }}
-        run: |
-          docker save ghcr.io/quilr/quilr-security-runner:latest:${{ github.sha }} -o image.tar
-          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" -w /src -e QUILR_URL -e QUILR_SECURITY_URL -e QUILR_TOKEN -e GITHUB_ACTIONS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_HEAD_REF -e GITHUB_RUN_ID -e GITHUB_STEP_SUMMARY -v "$RUNNER_TEMP:$RUNNER_TEMP" ghcr.io/quilr/quilr-security-runner:latest image-scan --image ghcr.io/quilr/quilr-security-runner:latest:${{ github.sha }} --archive image.tar
-
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
