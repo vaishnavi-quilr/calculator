@@ -15,16 +15,17 @@ jobs:
       QUILR_TOKEN: ${{ secrets.QUILR_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      
-      # Add this step to authenticate with ghcr.io
-      - name: Log in to GitHub Container Registry
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u $ --password-stdin
-      
       - name: Quilr code scan
-        run: docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" -w /src -e QUILR_URL -e QUILR_SECURITY_URL -e QUILR_TOKEN -e GITHUB_ACTIONS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_REF ghcr.io/quilr/quilr-security-runner:latest
-      
+        run: docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" -w /src -e QUILR_URL -e QUILR_SECURITY_URL -e QUILR_TOKEN -e GITHUB_ACTIONS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_HEAD_REF -e GITHUB_RUN_ID -e GITHUB_STEP_SUMMARY -v "$RUNNER_TEMP:$RUNNER_TEMP" ghcr.io/quilr/quilr-security-runner:latest code-scan --sarif quilr.sarif
       - uses: github/codeql-action/upload-sarif@v3
         if: always() && hashFiles('quilr.sarif') != ''
         with:
           sarif_file: quilr.sarif
           category: quilr
+      - name: Build image
+        run: docker build -t ghcr.io/your-org/your-app:${{ github.sha }} .
+      - name: Quilr image scan
+        run: |
+          docker save ghcr.io/your-org/your-app:${{ github.sha }} -o image.tar
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" -w /src -e QUILR_URL -e QUILR_SECURITY_URL -e QUILR_TOKEN -e GITHUB_ACTIONS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_HEAD_REF -e GITHUB_RUN_ID -e GITHUB_STEP_SUMMARY -v "$RUNNER_TEMP:$RUNNER_TEMP" ghcr.io/quilr/quilr-security-runner:latest image-scan --image ghcr.io/your-org/your-app:${{ github.sha }} --archive image.tar
+
