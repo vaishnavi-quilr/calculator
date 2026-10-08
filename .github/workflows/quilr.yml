@@ -23,9 +23,8 @@ jobs:
           sarif_file: quilr.sarif
           category: quilr
       - name: Build image
-        run: docker build -t ghcr.io/your-org/your-app:${{ github.sha }} .
+        run: docker build -t ghcr.io/vaishnavi-quilr/calculator:${{ github.sha }} .
       - name: Quilr image scan
         run: |
-          docker save ghcr.io/your-org/your-app:${{ github.sha }} -o image.tar
-          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" -w /src -e QUILR_URL -e QUILR_SECURITY_URL -e QUILR_TOKEN -e GITHUB_ACTIONS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_HEAD_REF -e GITHUB_RUN_ID -e GITHUB_STEP_SUMMARY -v "$RUNNER_TEMP:$RUNNER_TEMP" ghcr.io/quilr/quilr-security-runner:latest image-scan --image ghcr.io/your-org/your-app:${{ github.sha }} --archive image.tar
-
+          docker save ghcr.io/vaishnavi-quilr/calculator:${{ github.sha }} -o image.tar
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" -w /src -e QUILR_URL -e QUILR_SECURITY_URL -e QUILR_TOKEN -e GITHUB_ACTIONS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_HEAD_REF -e GITHUB_RUN_ID -e GITHUB_STEP_SUMMARY -v "$RUNNER_TEMP:$RUNNER_TEMP" ghcr.io/quilr/quilr-security-runner:latest image-scan --image ghcr.io/vaishnavi-quilr/calculator:${{ github.sha }} --archive image.tar
